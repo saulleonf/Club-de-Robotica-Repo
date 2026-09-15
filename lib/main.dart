@@ -20,9 +20,9 @@ class ClubRoboticaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Repositorio Club de Robótica\nbySaulLF',
+      title: 'Repositorio Club de Robótica bySaulLF',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 7, 84, 218)),
         useMaterial3: true,
       ),
       home: const HomeScreen(),
@@ -51,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Proyectos del Club de Robótica'),
+        title: const Text('Proyectos Club de Robótica ITVER'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
@@ -65,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
           }
           final proyectos = snapshot.data ?? [];
           if (proyectos.isEmpty) {
-            return const Center(child: Text('No hay proyectos registrados aún.'));
+            return const Center(child: Text('Ponganse a chambear'));
           }
           return ListView.builder(
             itemCount: proyectos.length,
