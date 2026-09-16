@@ -63,9 +63,9 @@ class _HomeScreenState extends State<HomeScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(controller: _tituloController, decoration: const InputDecoration(labelText: 'Título del Proyecto')),
-                TextField(controller: _categoriaController, decoration: const InputDecoration(labelText: 'Categoría (Ej: Mini-Sumo, IoT)')),
-                TextField(controller: _autorController, decoration: const InputDecoration(labelText: 'Autor o Equipo')),
-                TextField(controller: _descripcionController, decoration: const InputDecoration(labelText: 'Descripción / Componentes')),
+                TextField(controller: _categoriaController, decoration: const InputDecoration(labelText: 'Categoría')),
+                TextField(controller: _autorController, decoration: const InputDecoration(labelText: 'Autor/es')),
+                TextField(controller: _descripcionController, decoration: const InputDecoration(labelText: 'Descripción')),
                 TextField(controller: _enlaceController, decoration: const InputDecoration(labelText: 'Enlace de GitHub')),
               ],
             ),
@@ -91,11 +91,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   setState(() {}); // Recargar la lista de la pantalla principal
                   
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('¡Proyecto agregado con éxito!')),
+                    const SnackBar(content: Text('Listo')),
                   );
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error al guardar: $e')),
+                    SnackBar(content: Text('Error: $e')),
                   );
                 }
               },
@@ -111,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Proyectos del Club de Robótica'),
+        title: const Text('Proyectos Club de Robótica'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
@@ -125,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
           }
           final proyectos = snapshot.data ?? [];
           if (proyectos.isEmpty) {
-            return const Center(child: Text('No hay proyectos registrados aún. ¡Agrega el primero!'));
+            return const Center(child: Text('Ponganse a chamber'));
           }
           return ListView.builder(
             itemCount: proyectos.length,
@@ -175,7 +175,7 @@ class ProjectDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(proyecto['titulo'] ?? 'Detalle del Proyecto'),
+        title: Text(proyecto['titulo'] ?? 'Detalles del Proyecto'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: Padding(
@@ -193,22 +193,22 @@ class ProjectDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Autor / Equipo: ${proyecto['autor'] ?? 'No especificado'}',
+              'Autor: ${proyecto['autor'] ?? 'No especificado'}',
               style: TextStyle(fontSize: 16, color: Colors.grey[700], fontStyle: FontStyle.italic),
             ),
             const Divider(height: 32),
             const Text(
-              'Descripción y Documentación:',
+              'Descripción:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
-              proyecto['descripcion'] ?? 'Sin descripción detallada.',
+              proyecto['descripcion'] ?? 'Sin descripción.',
               style: const TextStyle(fontSize: 16, height: 1.5),
             ),
             const SizedBox(height: 32),
             const Text(
-              'Enlace al Repositorio de Código:',
+              'Enlace al Repositorio:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
