@@ -143,8 +143,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text('${proyecto['descripcion'] ?? ''}', maxLines: 2, overflow: TextOverflow.ellipsis),
                     ],
                   ),
-                  trailing: const Icon(Icons.code, color: Colors.deepOrange),
+                  trailing: const Icon(Icons.code, color: const Color.fromARGB(255, 7, 84, 218)),
                   isThreeLine: true,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ProjectDetailScreen(proyecto: proyecto),
+                      )
+                    );
+                  }
                 ),
               );
             },
@@ -155,6 +162,62 @@ class _HomeScreenState extends State<HomeScreen> {
         onPressed: () => _mostrarFormularioNuevoProyecto(context),
         tooltip: 'Agregar Proyecto',
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+class ProjectDetailScreen extends StatelessWidget {
+  final Map<String, dynamic> proyecto;
+
+  const ProjectDetailScreen({super.key, required this.proyecto});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(proyecto['titulo'] ?? 'Detalle del Proyecto'),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ListView(
+          children: [
+            Chip(
+              label: Text(proyecto['categoria'] ?? 'General', style: const TextStyle(fontWeight: FontWeight.bold)),
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              proyecto['titulo'] ?? 'Sin Título',
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Autor / Equipo: ${proyecto['autor'] ?? 'No especificado'}',
+              style: TextStyle(fontSize: 16, color: Colors.grey[700], fontStyle: FontStyle.italic),
+            ),
+            const Divider(height: 32),
+            const Text(
+              'Descripción y Documentación:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              proyecto['descripcion'] ?? 'Sin descripción detallada.',
+              style: const TextStyle(fontSize: 16, height: 1.5),
+            ),
+            const SizedBox(height: 32),
+            const Text(
+              'Enlace al Repositorio de Código:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            SelectableText(
+              proyecto['enlace_github'] ?? 'No hay enlace disponible.',
+              style: const TextStyle(fontSize: 16, color: Colors.blue, decoration: TextDecoration.underline),
+            ),
+          ],
+        ),
       ),
     );
   }
