@@ -1,121 +1,223 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  // Asegurar que los widgets estén inicializados
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Inicializar Supabase con tus credenciales de la nube
+  await Supabase.initialize(
+    url: 'https://qtsfsvxsmneiqchonojp.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF0c2ZzdnhzbW5laXFjaG9ub2pwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxNTg5MDAsImV4cCI6MjEwNDczNDkwMH0.Kearpk6gxff6gdS2GcNQ0huvJcZW7-rDaXFRklCjPyk',
+  );
+
+  runApp(const ClubRoboticaApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class ClubRoboticaApp extends StatelessWidget {
+  const ClubRoboticaApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Repositorio Club de Robótica bySaulLF',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 7, 84, 218)),
+        useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const HomeScreen(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+  
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _HomeScreenState extends State<HomeScreen> {
+  final supabase = Supabase.instance.client;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+
+  Future<List<Map<String, dynamic>>> _obtenerProyectos() async {
+    final response = await supabase.from('proyectos').select().order('created_at', ascending: false);
+    return List<Map<String, dynamic>>.from(response);
+  }
+
+  void _mostrarFormularioNuevoProyecto(BuildContext context) {
+    final _tituloController = TextEditingController();
+    final _descripcionController = TextEditingController();
+    final _categoriaController = TextEditingController();
+    final _autorController = TextEditingController();
+    final _enlaceController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Registrar Nuevo Proyecto'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(controller: _tituloController, decoration: const InputDecoration(labelText: 'Título del Proyecto')),
+                TextField(controller: _categoriaController, decoration: const InputDecoration(labelText: 'Categoría')),
+                TextField(controller: _autorController, decoration: const InputDecoration(labelText: 'Autor/es')),
+                TextField(controller: _descripcionController, decoration: const InputDecoration(labelText: 'Descripción')),
+                TextField(controller: _enlaceController, decoration: const InputDecoration(labelText: 'Enlace de GitHub')),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                // Enviar datos a Supabase
+                try {
+                  await supabase.from('proyectos').insert({
+                    'titulo': _tituloController.text,
+                    'categoria': _categoriaController.text,
+                    'autor': _autorController.text,
+                    'descripcion': _descripcionController.text,
+                    'enlace_github': _enlaceController.text,
+                  });
+
+                  Navigator.pop(context); // Cerrar ventana
+                  setState(() {}); // Recargar la lista de la pantalla principal
+                  
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Listo')),
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error: $e')),
+                  );
+                }
+              },
+              child: const Text('Guardar'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
+        title: const Text('Proyectos Club de Robótica'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _obtenerProyectos(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+          final proyectos = snapshot.data ?? [];
+          if (proyectos.isEmpty) {
+            return const Center(child: Text('Ponganse a chamber'));
+          }
+          return ListView.builder(
+            itemCount: proyectos.length,
+            itemBuilder: (context, index) {
+              final proyecto = proyectos[index];
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                child: ListTile(
+                  title: Text(proyecto['titulo'] ?? 'Sin título', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 4),
+                      Text('Autor: ${proyecto['autor'] ?? 'Desconocido'} | Categoría: ${proyecto['categoria'] ?? 'General'}'),
+                      Text('${proyecto['descripcion'] ?? ''}', maxLines: 2, overflow: TextOverflow.ellipsis),
+                    ],
+                  ),
+                  trailing: const Icon(Icons.code, color: const Color.fromARGB(255, 7, 84, 218)),
+                  isThreeLine: true,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ProjectDetailScreen(proyecto: proyecto),
+                      )
+                    );
+                  }
+                ),
+              );
+            },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _mostrarFormularioNuevoProyecto(context),
+        tooltip: 'Agregar Proyecto',
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+class ProjectDetailScreen extends StatelessWidget {
+  final Map<String, dynamic> proyecto;
+
+  const ProjectDetailScreen({super.key, required this.proyecto});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(proyecto['titulo'] ?? 'Detalles del Proyecto'),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ListView(
           children: [
-            const Text('You have pushed the button this many times:'),
+            Chip(
+              label: Text(proyecto['categoria'] ?? 'General', style: const TextStyle(fontWeight: FontWeight.bold)),
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+            ),
+            const SizedBox(height: 12),
             Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+              proyecto['titulo'] ?? 'Sin Título',
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Autor: ${proyecto['autor'] ?? 'No especificado'}',
+              style: TextStyle(fontSize: 16, color: Colors.grey[700], fontStyle: FontStyle.italic),
+            ),
+            const Divider(height: 32),
+            const Text(
+              'Descripción:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              proyecto['descripcion'] ?? 'Sin descripción.',
+              style: const TextStyle(fontSize: 16, height: 1.5),
+            ),
+            const SizedBox(height: 32),
+            const Text(
+              'Enlace al Repositorio:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            SelectableText(
+              proyecto['enlace_github'] ?? 'No hay enlace disponible.',
+              style: const TextStyle(fontSize: 16, color: Colors.blue, decoration: TextDecoration.underline),
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }
